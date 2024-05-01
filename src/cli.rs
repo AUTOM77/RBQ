@@ -1,17 +1,17 @@
-use arrow::compute::kernels::cmp::eq;
-use arrow::util::pretty::print_batches;
-use futures::TryStreamExt;
 use parquet::arrow::arrow_reader::{ArrowPredicateFn, RowFilter};
 use parquet::arrow::{ParquetRecordBatchStreamBuilder, ProjectionMask};
 use parquet::errors::Result;
-use tokio::fs::File;
+use futures::TryStreamExt;
+use tokio::fs;
+use tokio::io::{AsyncWriteExt, BufWriter};
+use tokio::task;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let start_time = std::time::Instant::now();
 
     let path = format!("/dev/shm/pixel/000001.parquet");
-    let file = File::open(path).await.unwrap();
+    let file = fs::File::open(path).await.unwrap();
 
     let mut builder = ParquetRecordBatchStreamBuilder::new(file).await.unwrap().with_batch_size(1);
 
